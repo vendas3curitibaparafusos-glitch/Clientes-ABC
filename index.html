@@ -40,6 +40,7 @@ ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .open .det{display:block}.det p{margin:3px 0}.det a{color:var(--acc)}
 .empty{padding:30px;text-align:center;color:var(--mut)}
 :focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.ov{background:var(--chip);border:1px solid var(--line);border-radius:5px;padding:0 6px;font-weight:600}
 .nb{background:var(--chip);border-radius:5px;padding:0 6px;font-weight:600;color:var(--ink)}
 .nota{grid-column:1/-1;margin-top:10px;border-top:1px dashed var(--line);padding-top:10px;cursor:default}
 .nota h3{font-size:14px;margin:0 0 8px}
@@ -71,29 +72,34 @@ const OPEN=new Set(),DR={},RS={};
 const RES=["Atendeu, conversa ok","Pediu orçamento","Pedido fechado","Não atendeu","Pediu retorno depois","Sem interesse"];
 let NT={};try{NT=JSON.parse(localStorage.getItem("cv_notas")||"{}")}catch(e){NT={}}
 function persist(){try{localStorage.setItem("cv_notas",JSON.stringify(NT))}catch(e){}}
-const key=r=>D[v].n+"|"+r[0];
+// Vendedor de cada cliente da carteira do Clayton (coluna E da planilha, na mesma ordem da lista).
+const OWNER=["Vanessa Colodel", "Vanessa Colodel", "Vanessa Colodel", "Vanessa Colodel", "Vanessa Colodel", "Vanessa Colodel", "Vanessa Colodel", "Vanessa Colodel", "Vanessa Colodel", "Vanessa Colodel", "Clayton Peller", "", "Leticia Calhares", "Marcelia Silva", "Jean Castilho", "Jean Castilho", "Vanessa Colodel", "", "", "", "", "Jean Castilho", "Jean Castilho", "Jean Castilho", "Jean Castilho", "Marcelia Silva", "Marcelia Silva", "Gabriel Santos", "", "", "Jean Castilho", "Jean Castilho", "Marcelia Silva", "", "Marcelia Silva", "", "Jean Castilho", "", "", "Jean Castilho", "Larissa Ramos", "Jean Castilho", "", "Jean Castilho", "Larissa Ramos", "Marcelia Silva", "", "Jean Castilho", "Larissa Ramos", "", "", "Jean Castilho", "Marcelia Silva", "Marcelia Silva", "Marcelia Silva", "Vanessa Colodel", "Marcelia Silva", "Jean Castilho", "Jean Castilho", "Jean Castilho", "", "Marcelia Silva", "Marcelia Silva", "Jean Castilho", "", "Jean Castilho", "", "Marcelia Silva", "Marcelia Silva", "", "Jean Castilho", "Larissa Ramos", "", "", "Marcelia Silva", "Eduarda Silva", "Eduarda Silva", "Jean Castilho", "", "Leticia Calhares", "", "Leticia Calhares", "", "Jean Castilho", "Jean Castilho", "Marcelia Silva", "", "", "Marcelia Silva", "", "", "Jean Castilho", "", "", "", "", "", "Larissa Ramos", "", "", "Jean Castilho", "Marcelia Silva", "Jean Castilho", "", "Marcelia Silva", "", "", "", "Larissa Ramos", "", "Marcelia Silva", "Marcelia Silva", "Marcelia Silva", "Marcelia Silva", "", "Jean Castilho", "", "Leticia Calhares", "Marcelia Silva", "", "", "", "Marcelia Silva", "Marcelia Silva", "", "Marcelia Silva", "Elyzabety Zumach", "Jean Castilho", "", "", "Jean Castilho", "", "Jean Castilho", "Larissa Ramos", "", "Jean Castilho", "Jean Castilho", "Larissa Ramos", "Jean Castilho", "", "Marcelia Silva", "", "", "Marcelia Silva", "Jean Castilho", "Larissa Ramos", "Marcelia Silva", "", "", "Larissa Ramos", "Jean Castilho", "Gabriel Santos", "Jean Castilho", "", "Jean Castilho", "", "Marcelia Silva", "", "", "Marcelia Silva", "Larissa Ramos", "", "Larissa Ramos", "Marcelia Silva", "Jean Castilho", "Larissa Ramos", "", "Jean Castilho", "Rafael Peller", "Larissa Ramos", "Jean Castilho", "Jean Castilho", "", "", "Larissa Ramos", "Larissa Ramos", "Marcelia Silva", "", "Jean Castilho", "", "Marcelia Silva", "", "Marcelia Silva", "Larissa Ramos", "Marcelia Silva", "", "", "Marcelia Silva", "Jean Castilho", "Marcelia Silva", "", "", "", "", "", "", "Marcelia Silva", "", "", "Jean Castilho", "", "", "", "", "", "", "Jean Castilho", "", "", "", "", "", "", "", "", "", "", "Larissa Ramos", "Leticia Calhares", "", "", "Marcelia Silva", "", "", "Clayton Peller", "Marcelia Silva", "Marcelia Silva", "", "", "", "", "", "", "", "Gabriel Santos", "", "", "Jean Castilho", "", "Jean Castilho", "", "", "Larissa Ramos", "", "", "Marcelia Silva", "", "Larissa Ramos", "", "", "", "", "", "", "", "Jean Castilho", "Larissa Ramos", "", "", "Marcelia Silva", "Vanessa Colodel", "", "", "", "", "", "Larissa Ramos", "Marcelia Silva", "", "", "Marcelia Silva", "", "", "", "", "Larissa Ramos", "", "", "Marcelia Silva", "", "Larissa Ramos", "", "", "Larissa Ramos", "", "", "", "", "Jean Castilho", "", "", "", "", "", "", "", "", "", ""];
+const OUT=r=>r[11]&&!/^Clayton/.test(r[11]);
+{const seen={};D.forEach(d=>d.r.forEach((r,ix)=>{const b=d.n+"|"+r[0];seen[b]=(seen[b]||0)+1;r.k=seen[b]>1?b+"#"+seen[b]:b;if(d.n==="Clayton"&&OWNER[ix])r[11]=OWNER[ix]}))}
+const key=r=>r.k;
 const $=id=>document.getElementById(id);
 const esc=x=>String(x).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const money=n=>n>=1e6?"R$ "+(n/1e6).toFixed(1).replace(".",",")+" mi":n>=1e3?"R$ "+(n/1e3).toFixed(1).replace(".",",")+" mil":"R$ "+Math.round(n);
 const full=n=>n.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const since=n=>n===null?"sem compras":n===0?"comprou em out/26":"há "+n+(n>1?" meses":" mês");
 function spark(m){const mx=Math.max(...m,1);return'<svg width="78" height="24" viewBox="0 0 78 24" aria-hidden="true">'+m.map((x,i)=>{const h=Math.max(x>0?2:0,Math.round(x/mx*22));return`<rect x="${i*6.5}" y="${24-h}" width="5" height="${h}" rx="1" fill="var(--acc)" opacity="${i===11?1:.55}"/>`}).join("")+"</svg>"}
-function match(r){return f==="todos"||(f==="att"&&r[3]<=2)||f===r[1]||f===r[2]}
+function match(r){return f==="todos"||(f==="outros"&&OUT(r))||(f==="att"&&r[3]<=2)||f===r[1]||f===r[2]}
 function draw(){
   const R=D[v].r,tot=R.reduce((a,r)=>a+r[5],0),n=k=>R.filter(r=>r[1]===k).length,att=R.filter(r=>r[3]<=2).length;
   $("tabs").innerHTML=D.map((d,i)=>`<button class="tab" aria-pressed="${i===v}" data-v="${i}">${esc(d.n)}</button>`).join("");
   $("kpis").innerHTML=`<div class="k"><small>Clientes</small><b>${R.length}</b><div class="abc"><span>A ${n("A")}</span><span>B ${n("B")}</span><span>C ${n("C")}</span></div></div><div class="k"><small>Faturamento 12 meses</small><b>${money(tot)}</b></div><div class="k att" data-att="1" role="button" tabindex="0"><small>Pedem atenção</small><b>${att}</b><small>clientes A ou B sem comprar</small></div>`;
-  $("chips").innerHTML=FL.map(([k,t])=>`<button class="chip" aria-pressed="${f===k}" data-f="${k}">${t}</button>`).join("")+`<input type="search" id="q" placeholder="Buscar cliente" value="${esc(q)}" aria-label="Buscar cliente"><select id="s" aria-label="Ordenar"><option value="prio">Mais urgentes primeiro</option><option value="val">Maior faturamento</option><option value="rec">Compra mais recente</option></select>`;
+  if(f==="outros"&&!R.some(OUT))f="todos";
+  $("chips").innerHTML=(R.some(OUT)?FL.concat([["outros","De outros vendedores"]]):FL).map(([k,t])=>`<button class="chip" aria-pressed="${f===k}" data-f="${k}">${t}</button>`).join("")+`<input type="search" id="q" placeholder="Buscar cliente" value="${esc(q)}" aria-label="Buscar cliente"><select id="s" aria-label="Ordenar"><option value="prio">Mais urgentes primeiro</option><option value="val">Maior faturamento</option><option value="rec">Compra mais recente</option></select>`;
   $("s").value=s;
   list();
 }
 function list(){
-  let L=D[v].r.filter(r=>match(r)&&r[0].toLowerCase().includes(q.toLowerCase()));
+  let L=D[v].r.filter(r=>match(r)&&(r[0]+" "+(r[11]||"")).toLowerCase().includes(q.toLowerCase()));
   L.sort(s==="val"?(a,b)=>b[5]-a[5]:s==="rec"?(a,b)=>(a[10]??99)-(b[10]??99):(a,b)=>a[3]-b[3]||b[5]-a[5]);
   $("list").innerHTML=L.length?L.map(r=>{
     const ph=r[8]?r[8].split("  |  "):[],em=r[9]?r[9].split("; "):[];
     const k=key(r),hs=NT[k]||[];
-    return`<li class="row ${r[2]}${OPEN.has(k)?" open":""}" data-k="${esc(k)}"><div><div class="nm">${esc(r[0])}</div><div class="sub"><span class="cl">${esc(r[1])}</span><span class="st">${r[2]}</span>${r[3]<=2?'<span class="cr">'+(r[3]===1?"Crítica":"Alta")+"</span>":""}${hs.length?`<span class="nb">📝 ${hs.length}</span>`:""}<span>${r[4]?"última compra "+r[4]+", ":""}${since(r[10])}</span></div></div>
+    return`<li class="row ${r[2]}${OPEN.has(k)?" open":""}" data-k="${esc(k)}"><div><div class="nm">${esc(r[0])}</div><div class="sub"><span class="cl">${esc(r[1])}</span><span class="st">${r[2]}</span>${r[11]?`<span class="ov" title="Cliente do vendedor ${esc(r[11])}">👤 ${esc(r[11].split(" ")[0])}</span>`:""}${r[3]<=2?'<span class="cr">'+(r[3]===1?"Crítica":"Alta")+"</span>":""}${hs.length?`<span class="nb">📝 ${hs.length}</span>`:""}<span>${r[4]?"última compra "+r[4]+", ":""}${since(r[10])}</span></div></div>
 <div class="right">${spark(r[6])}<div class="val">${money(r[5])}</div><div class="act">${ph[0]?`<a href="tel:${ph[0].replace(/\D/g,"")}" title="${esc(ph[0])}" aria-label="Ligar">📞</a>`:""}${em[0]?`<a href="mailto:${esc(em[0])}" title="${esc(em[0])}" aria-label="Enviar e-mail">✉️</a>`:""}</div></div>
 <div class="det"><p><b>Faturamento 12 meses:</b> ${full(r[5])}</p>${r[7]?`<p><b>Contato:</b> ${esc(r[7])}</p>`:""}<p><b>Telefone:</b> ${ph.length?ph.map(p=>`<a href="tel:${p.replace(/\D/g,"")}">${esc(p)}</a>`).join(" &nbsp; "):"não cadastrado"}</p><p><b>E-mail:</b> ${em.length?em.map(e=>`<a href="mailto:${esc(e)}">${esc(e)}</a>`).join("; "):"não cadastrado"}</p>
 <div class="nota"><h3>Observações do contato</h3>${hs.length?`<div class="hist">${hs.map((h,i)=>`<div class="hi"><small><span>${esc(h.d)}${h.r?` · <span class="rs">${esc(h.r)}</span>`:""}</span><button class="dl" data-del="${i}" aria-label="Apagar observação" title="Apagar">✕</button></small><p>${esc(h.t)}</p></div>`).join("")}</div>`:""}
